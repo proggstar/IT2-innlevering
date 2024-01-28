@@ -15,6 +15,7 @@ BABYBLUE = (137, 207, 240)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 
+
 # Initierer pygame
 pg.init()
 
@@ -60,6 +61,11 @@ class Spillbrett:
             sau.pop(spillobjekt)
         
         print("Jeg fjernet et ", + spillobjekt)
+    
+    
+
+
+
 
 
 class Spillobjekt:
@@ -67,9 +73,10 @@ class Spillobjekt:
         self.xPosisjon = xPosisjon
         self.yPosisjon = yPosisjon
 
-    def plassering(self):
-        self.xPosisjon = 0
-        self.yPosisjon = 0
+    def settPosisjon(self, x, y):
+        self.xPosisjon = x
+        self.yPosisjon = y
+
 
     def hentPosisjon(self):
         return (self.xPosisjon, self.yPosisjon)
@@ -97,13 +104,19 @@ class Spokelse(Spillobjekt):
     def hentRektangel(self):
         return pg.Rect(self.xPosisjon, self.yPosisjon, 25, 25)
 
+    def frys(self):
+        self.vx = 0
+        self.vy = 0
+
 
 class Menneske(Spillobjekt):
+    
     def __init__(self, fart, poeng, holderSau):
         super().__init__(rd.randint(0, 100 - 25), rd.randint(0, HEIGHT - 25))
         self.fart = fart
         self.poeng = poeng
-        self.holderSau = holderSau
+        self.holderSau = False
+        self.sauSomErHoldt = None 
 
     def hentRektangel(self):
         return pg.Rect(self.xPosisjon, self.yPosisjon, 25, 25)
@@ -112,20 +125,26 @@ class Menneske(Spillobjekt):
     def hentNesteRektangel(self, dx, dy):
         return pg.Rect(self.xPosisjon + dx, self.yPosisjon + dy, 25, 25)
 
+    def settHastighet(self, vx,vy):
+        self.vx = vx
+        self.vy = vy
+
+
     def beveg(self, hindringer):
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
             if not any(self.hentNesteRektangel(-5,0).colliderect(hindring.hentRektangel()) for hindring in hindringer):
-                self.xPosisjon += -5
+                self.xPosisjon -= self.vx
         if keys[pg.K_RIGHT]:
             if not any(self.hentNesteRektangel(5,0).colliderect(hindring.hentRektangel()) for hindring in hindringer):
-                self.xPosisjon += 5
+                self.xPosisjon += self.vx
         if keys[pg.K_DOWN]:
             if not any(self.hentNesteRektangel(0,2).colliderect(hindring.hentRektangel()) for hindring in hindringer):
-                self.yPosisjon += 5
+                self.yPosisjon += self.vy
         if keys[pg.K_UP]:
             if not any(self.hentNesteRektangel(0,-2).colliderect(hindring.hentRektangel()) for hindring in hindringer):
-                self.yPosisjon += -5
+                self.yPosisjon -= self.vy
+        
         
 
 
@@ -147,14 +166,13 @@ class Sau(Spillobjekt):
     def tegnSau(self):
         pg.draw.rect(surface, GREEN, [self.xPosisjon, self.yPosisjon, 25, 25])
 
-
-
-    
-
+    def hentRektangel(self):
+        return pg.Rect(self.xPosisjon, self.yPosisjon, 25, 25)
 
 
 # Oppretter menneskeobjektet
 menneske = Menneske(0, 0, False)
+menneske.settHastighet(5,5)
 
 W = 25
 H = 25
@@ -191,9 +209,36 @@ while run:
     if any(menneske.hentRektangel().colliderect(hindring.hentRektangel()) for hindring in spillbrett.hindringer):
         print("Kollisjon mellom menneske og hindring")
 
-    if any(menneske.hentRektangel().colliderect(spokelse.hentRektangel()) for hindring in spillbrett.spokelser):
-        print("Kollisjon mellom menneske og spokelse")
+    if any(menneske.hentRektangel().colliderect(spokelse.hentRektangel()) for spokelse in spillbrett.spokelser):
+        for spokelse in spillbrett.spokelser:
+            spokelse.frys()
+            
+        menneske.settHastighet(0,0)
+        print("Gameover")
+        
 
+   
+    for sau in spillbrett.sauer:
+        if not menneske.holderSau:
+            if menneske.hentRektangel().colliderect(sau.hentRektangel()):
+                menneske.holderSau = True
+                menneske.sauSomErHoldt = sau
+                menneske.settHastighet(3, 3)
+
+    if menneske.holderSau and menneske.sauSomErHoldt.hentPosisjon()[0] < 100:
+        menneske.sauSomErHoldt.settPosisjon(0,0)
+        spillbrett.leggTilSpillObjekt(Sau())
+        spillbrett.leggTilSpillObjekt(Spokelse())
+        spillbrett.leggTilSpillObjekt(Hindring())
+        print("Sau er poeng")
+        menneske.settHastighet(5, 5)
+        menneske.sauSomErHoldt = None
+        menneske.holderSau = False
+
+    for sau in spillbrett.sauer:
+        if menneske.holderSau and sau is menneske.sauSomErHoldt:
+            sau.settPosisjon(menneske.hentPosisjon()[0]+5, menneske.hentPosisjon()[1])
+        sau.tegnSau()
 
 
     # Fyller skjermen med en farge
