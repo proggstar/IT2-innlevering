@@ -1,6 +1,7 @@
 import pygame as pg
 import sys
 import random as rd
+import Spøkelse from './'
 
 # Konstanter
 WIDTH = 800
@@ -25,7 +26,6 @@ class Spillobjekt:
 
 class Menneske(Spillobjekt):
     def __init__(self, fart, poeng, bærerSau):
-        super().__init__(0, 0)
         self.fart = fart
         self.poeng = poeng
         self.bærerSau = bærerSau
@@ -36,29 +36,16 @@ class Menneske(Spillobjekt):
 
     def beveg(self):
         keys = pg.key.get_pressed()
-        self.retning_x = 0
-        self.retning_y = 0
-
         if keys[pg.K_LEFT] and self.xPosisjon >= 0:
-            self.retning_x = -5
-        if keys[pg.K_RIGHT] and self.xPosisjon <= WIDTH - W + 1:
-            self.retning_x = 5
-        if keys[pg.K_DOWN] and self.yPosisjon <= HEIGHT - H + 1:
-            self.retning_y = 5
+            self.xPosisjon += -5
+        if keys[pg.K_RIGHT] and self.xPosisjon <= WIDTH - W:
+            self.xPosisjon += 5
+        if keys[pg.K_DOWN] and self.yPosisjon <= HEIGHT - H:
+            self.yPosisjon += 5
         if keys[pg.K_UP] and self.yPosisjon >= 0:
-            self.retning_y = -5
+            self.yPosisjon += -5
 
-        self.xPosisjon += self.retning_x
-        self.yPosisjon += self.retning_y
 
-class Spøkelse(Spillobjekt):
-    def __init__(self):
-        super().__init__(0, 0)
-        self.vx = 3
-        self.vy = 3
-
-    def tegnSpøkelse(self):
-        pg.draw.rect(surface, BLUE, [self.xPosisjon, self.yPosisjon, 25, 25])
 
 # Initierer pygame
 pg.init()
