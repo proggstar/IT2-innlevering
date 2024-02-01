@@ -1,7 +1,6 @@
 import pygame as pg
 import sys
 import random as rd
-import time
 
 # Initierer pygame
 pg.init()
@@ -47,10 +46,6 @@ gjerde_img = pg.transform.scale(gjerde_img, (25, 75))
 menneske_img = pg.image.load('menneske.png')
 menneske_img = pg.transform.scale(menneske_img, (25, 25))
 
-#Lydeffekt
-poeng_sfx = pg.mixer.Sound('poeng.mp3')
-gameover_sfx = pg.mixer.Sound('gameover.mp3')
-
 
 # Lager en overflate vi kan tegne pa
 surface = pg.display.set_mode(SIZE)
@@ -63,47 +58,32 @@ run = True
 
 # Klasser
 class Spillbrett:
-    spokelser = [] # Liste av Spøkelse. List<Spøkelse>
-    hindringer = [] # Liste av Hindring. List<Hindring>
-    sauer = [] # Liste av Sau. 
+    spokelser = []  # Liste av Spøkelse. List<Spøkelse>
+    hindringer = []  # Liste av Hindring. List<Hindring>
+    sauer = []  # Liste av Sau.
 
     def leggTilSpillObjekt(self, spillobjekt):
         if isinstance(spillobjekt, Spokelse):
             self.spokelser.append(spillobjekt)
-            
         elif isinstance(spillobjekt, Hindring):
-            run = True
-            while run:
-                ny_hindring = Hindring()
-                if not any(existing_hindring.hentRektangel().colliderect(ny_hindring.hentRektangel()) for existing_hindring in self.hindringer):
-                    self.hindringer.append(ny_hindring)
-                    run = False
-        
+            while len(self.hindringer) < 3:
+                plassering = not any(sau.colliderect(spillobjekt) for sau in self.sauer)
+                if plassering:
+                    self.hindringer.append(spillobjekt)
+                    break
         elif isinstance(spillobjekt, Sau):
-            run = True
-            while run:
-                ny_sau = Sau()
-                if not any(existing_sau.hentRektangel().colliderect(ny_sau.hentRektangel()) for existing_sau in self.sauer):
-                    self.sauer.append(ny_sau)
-                    run = False
-                
-                    
-                    
-                    
-                    
-                        
-
-
-
+            if not any(sau.colliderect(spillobjekt) for sau in self.sauer):
+                self.sauer.append(spillobjekt)
+            
     def fjernSpillObjekt(self, spillobjekt):
         if isinstance(spillobjekt, Spokelse):
-            self.spokelser.remove(spillobjekt)
-            
+            self.rspokelse.pop(spillobjekt)
+        
         elif isinstance(spillobjekt, Hindring):
             self.hindringer.remove(spillobjekt)
-            
+
         else:
-            self.sauer.remove(spillobjekt)
+            self.sau.remove(spillobjekt)
 
     def antallPoeng(self):
         text_img = font.render(f"{tekst} {poeng}", True, BLACK)
@@ -245,14 +225,9 @@ while run:
     if any(menneske.hentRektangel().colliderect(spokelse.hentRektangel()) for spokelse in spillbrett.spokelser):
         for spokelse in spillbrett.spokelser:
             spokelse.frys()
-            gameover_sfx.play()
             font = pg.font.SysFont('Arial', 160)
             tekst = "game over"
             poeng = ""
-            
-            time.sleep(1)
-            run = False
-            
             
         menneske.settHastighet(0,0)
   
@@ -269,22 +244,9 @@ while run:
         spillbrett.leggTilSpillObjekt(Spokelse())
         spillbrett.leggTilSpillObjekt(Hindring())
         poeng += 1
-        poeng_sfx.play() 
         menneske.settHastighet(5, 5)
         menneske.sauSomErHoldt = None
         menneske.holderSau = False
-    
-    
-    for sau1 in spillbrett.sauer:
-        for sau2 in spillbrett.sauer:
-            if sau1 != sau2 and sau1.hentRektangel().colliderect(sau2.hentRektangel()):
-                spokelse.frys()
-                font = pg.font.SysFont('Arial', 160)
-                tekst = "game over"
-                poeng = ""
-                time.sleep(3)
-                gameover_sfx.play()
-                run = False 
 
     for sau in spillbrett.sauer:
         if menneske.holderSau and sau is menneske.sauSomErHoldt:
@@ -328,6 +290,5 @@ while run:
 # Avslutter pygame
 pg.quit()
 sys.exit()
-
 
 
