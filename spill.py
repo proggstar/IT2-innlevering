@@ -211,7 +211,7 @@ class Sau(Spillobjekt):
 
 # Oppretter menneskeobjektet
 menneske = Menneske(0, 0, False)
-menneske.settHastighet(5,5)
+menneske.settHastighet(6,6)
 
 W = 25
 H = 25
@@ -270,21 +270,21 @@ while run:
         spillbrett.leggTilSpillObjekt(Hindring())
         poeng += 1
         poeng_sfx.play() 
-        menneske.settHastighet(5, 5)
+        menneske.settHastighet(6, 6)
         menneske.sauSomErHoldt = None
         menneske.holderSau = False
     
-    
-    for sau1 in spillbrett.sauer:
-        for sau2 in spillbrett.sauer:
-            if sau1 != sau2 and sau1.hentRektangel().colliderect(sau2.hentRektangel()):
-                spokelse.frys()
-                font = pg.font.SysFont('Arial', 160)
-                tekst = "game over"
-                poeng = ""
-                time.sleep(3)
-                gameover_sfx.play()
-                run = False 
+    if menneske.sauSomErHoldt == True:
+        for sau1 in spillbrett.sauer:
+            for sau2 in spillbrett.sauer:
+                if sau1 != sau2 and sau1.hentRektangel().colliderect(sau2.hentRektangel()):
+                    spokelse.frys()
+                    font = pg.font.SysFont('Arial', 160)
+                    tekst = "game over"
+                    poeng = ""
+                    time.sleep(3)
+                    gameover_sfx.play()
+                    run = False
 
     for sau in spillbrett.sauer:
         if menneske.holderSau and sau is menneske.sauSomErHoldt:
