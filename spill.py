@@ -283,7 +283,7 @@ while run:
                     tekst = "game over"
                     poeng = ""
                     time.sleep(3)
-                    gameover_sfx.play()
+                    #gameover_sfx.play()
                     run = False
 
     for sau in spillbrett.sauer:
