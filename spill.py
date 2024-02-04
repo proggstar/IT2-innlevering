@@ -276,15 +276,16 @@ while run:
         spillbrett.leggTilSpillObjekt(Hindring())
         poeng += 1
         poeng_sfx.play() 
-        menneske.settHastighet(6, 6)
+        menneske.settHastighet(5, 5)
         menneske.sauSomErHoldt = None
         menneske.holderSau = False
-    
-    #Sjekker om en menneske som bærer sau objektet kolliderer med en annen sau
-    if menneske.sauSomErHoldt:
+        
+    # Sjekker om en menneske som bærer sau objektet kolliderer med en annen sau
+    if menneske.holderSau == True:
         for sau1 in spillbrett.sauer:
             for sau2 in spillbrett.sauer:
-                if sau1 != sau2 and sau1.hentRektangel().colliderect(sau2.hentRektangel()):
+                if sau1 != sau2 and menneske.holderSau and menneske.sauSomErHoldt is sau1 and sau1.hentRektangel().colliderect(sau2.hentRektangel()):
+                
                     spokelse.frys()
                     font = pg.font.SysFont('Arial', 160)
                     tekst = "game over"
@@ -293,6 +294,7 @@ while run:
                     gameover_sfx.play()
                     run = False
                     break
+                   
                     
     #Plasserer sau "oppå" menneske
     for sau in spillbrett.sauer:
