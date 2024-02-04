@@ -210,7 +210,7 @@ class Sau(Spillobjekt):
 
 # Oppretter menneskeobjektet
 menneske = Menneske(0, 0, False)
-menneske.settHastighet(6,6)
+menneske.settHastighet(5,5)
 
 spillbrett = Spillbrett()
 
